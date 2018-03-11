@@ -15,12 +15,14 @@ var Cfg;
             let graph = Graph.new();
             let buffer = fs.readFileSync(filename);
             let formatter = new ObjDumpFormatter_1.ObjDumpFormatter();
-            let { nodes, edges } = asmParser_1.AsmParser.parse(buffer, formatter, '84c');
+            let { nodes, edges } = asmParser_1.AsmParser.parse(buffer, formatter, '804ccda', 250);
             graph.nodes = nodes.map(e => Node.new(e));
             graph.edges = edges.map(e => Edge.new((Object.assign(e, {
                 source: _.find(graph.nodes, { id: e.source.id }),
                 target: _.find(graph.nodes, { id: e.target.id })
             }))));
+            console.log('Nodes: ', graph.nodes.length);
+            console.log('Edges: ', graph.edges.length);
             return graph;
         }
     }

@@ -10,9 +10,10 @@ export class AsmParser {
      * @param {Buffer} buffer
      * @param {Formatter} formatter
      * @param {string} entryPoint
+     * @param {number} limit
      * @returns {Buffer}
      */
-    static parse(buffer: Buffer, formatter: Formatter, entryPoint: string): {
+    static parse(buffer: Buffer, formatter: Formatter, entryPoint: string, limit?: number): {
             nodes: {body: RowList, id: string, label?: string, initialAddress?: any}[],
             edges: {source: {id:string}, target:{id: string}, label?: string, id: string}[]
     } {
@@ -21,14 +22,14 @@ export class AsmParser {
         let nodes: {body: RowList, id: string, label?: string, initialAddress?: any}[] = [];
         let edges: {source: {id: string}, target:{id: string}, label?: string, id: string}[] = [];
         let rowSet: Row[] = [];
-        let stack = [{braceNode: null, nextRow: rows.toPointer(entryPoint)}];
-        let callstack = [];
+        let stack = [{braceNode: null, nextRow: rows.toPointer(entryPoint), row: null, callstack: []}];
+        limit = limit || Number.MAX_VALUE;
         let initialAddress = function (){
             let row = this.body.get(0);
             return row ? row.address : null;
         };
 
-        while (stack.length) {
+        while (stack.length && nodes.length < limit) {
             let state = stack.pop();
             if(state.nextRow instanceof Row){
                 rows.toPointer(state.nextRow.address);
@@ -41,7 +42,7 @@ export class AsmParser {
                 if (address = row.getControlFlowAddress()) {
                     // TODO Create logic of building ControlFlowGraph block.
                     let node = null;
-                    if(!(node = _.find(nodes, e => e.initialAddress() == rows.nextOf(rows.get(address)).address ))) {
+                    if(!(node = _.find(nodes, e => e.initialAddress() == address))) {
                         nodes.push({
                             body: new RowList(rowSet),
                             label: "",
@@ -66,22 +67,30 @@ export class AsmParser {
                         });
                     }
                     if (row.isDoubleBraceFlow()) {
-                        stack.push({braceNode: _.last(nodes), nextRow: rows.nextOf(row)});
+                        // If has infinite cycle in code flow
+                        let index = 0;
+                        if((index = _.findIndex(stack, {row: row.address})) >= 0){
+                            let braceNode: {nextRow: boolean|Row} = stack.splice(index, 1).pop();
+                            rows.toPointer(braceNode.nextRow instanceof Row ? braceNode.nextRow.address : '');
+                            continue;
+                        } else {
+                            stack.push({braceNode: _.last(nodes), nextRow: rows.nextOf(row), row: row.address, callstack: state.callstack.slice()});
+                        }
                     }
 
                     rowSet = [];
                     rows.toPointer(address);
                     /* If control flow command was call. Save return address in stack. */
                     if((new RegExp('call\\s+', 'i')).test(row.command)){
-                        callstack.push(row);
+                        state.callstack.push(row);
                     }
                 } else if(address == null){ /* If control flow command is ret or bad jmp address */
                     // TODO Change simple save address of return to analyze stack contains.
                     // TODO bad jmp address.
-                    if(!callstack.length){
+                    if(!state.callstack.length){
                         throw new Error("Stack corruption. CallStack is empty now.");
                     }
-                    let callable = callstack.pop();
+                    let callable = state.callstack.pop();
                     let node = null;
                     if(!(node = _.find(nodes, e => e.initialAddress() == rows.nextOf(callable).address))) {
                         nodes.push({

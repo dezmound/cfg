@@ -152,8 +152,8 @@ export namespace Asm{
          * Move pointer to row with same address.
          * @param {string} address
          */
-        public toPointer(address: string): boolean| Row{
-            let index = this.rows.findIndex(e => e.address == address);
+        public toPointer(address: string): boolean| Row {
+            let index = this.rows.findIndex(e => e.address === address);
             if(index >= 0){
                 this.pointer = index;
                 return this.rows[this.pointer];

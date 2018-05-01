@@ -11,18 +11,16 @@ var Cfg;
      * Control flow graph builder.
      */
     class CfgBuilder {
-        static parse(filename) {
+        static parse(filename, entryPoint) {
             let graph = Graph.new();
             let buffer = fs.readFileSync(filename);
             let formatter = new ObjDumpFormatter_1.ObjDumpFormatter();
-            let { nodes, edges } = asmParser_1.AsmParser.parse(buffer, formatter, '804ccda', 250);
+            let { nodes, edges } = asmParser_1.AsmParser.parse(buffer, formatter, entryPoint /*'804ccda'*/, 512);
             graph.nodes = nodes.map(e => Node.new(e));
             graph.edges = edges.map(e => Edge.new((Object.assign(e, {
                 source: _.find(graph.nodes, { id: e.source.id }),
                 target: _.find(graph.nodes, { id: e.target.id })
             }))));
-            console.log('Nodes: ', graph.nodes.length);
-            console.log('Edges: ', graph.edges.length);
             return graph;
         }
     }
@@ -61,8 +59,8 @@ var Cfg;
                 label: this.id != '1' ? `Code: ${this.getMeta().rows}` : `---Entry point---: ${this.getMeta().rows}`,
                 // metadata: this.getMeta(),
                 size: this.id != '1' ? this.body.size() : 20,
-                x: ((parseInt(this.id) - 1) % 10) * 2 + (Math.random() * 100 % 5),
-                y: Math.floor((parseInt(this.id) - 1) / 10) * 5 + (Math.random() * 100 % 5),
+                x: ((parseInt(this.id) - 1) % 10) * 2 + (Math.random() * 100 % 13),
+                y: Math.floor((parseInt(this.id) - 1) / 10) * 5 + (Math.random() * 100 % 13),
                 color: '#' + crypto.randomBytes(3).toString('hex')
             };
         }

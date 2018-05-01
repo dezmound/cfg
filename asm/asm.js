@@ -127,7 +127,7 @@ var Asm;
          * @param {string} address
          */
         toPointer(address) {
-            let index = this.rows.findIndex(e => e.address == address);
+            let index = this.rows.findIndex(e => e.address === address);
             if (index >= 0) {
                 this.pointer = index;
                 return this.rows[this.pointer];

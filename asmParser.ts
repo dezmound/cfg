@@ -31,6 +31,8 @@ export class AsmParser {
 
         while (stack.length && nodes.length < limit) {
             let state = stack.pop();
+            let firstAddress = '';
+            let lastAddress = '';
             if(state.nextRow instanceof Row){
                 rows.toPointer(state.nextRow.address);
             } else {
@@ -39,6 +41,12 @@ export class AsmParser {
             for (let row of rows) {
                 // console.log(row.toString());
                 // TODO Logic of if double address.
+                if(firstAddress === row.address) {
+                    firstAddress = lastAddress;
+                    rows.toPointer(rows.nextOf(rows.get(lastAddress)).address);
+                }
+                firstAddress = firstAddress || address;
+                lastAddress = row.address;
                 if (address = row.getControlFlowAddress()) {
                     // TODO Create logic of building ControlFlowGraph block.
                     let node = null;

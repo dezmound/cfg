@@ -14,7 +14,7 @@ if(!args.entry) {
 if(args.server){
     let app = Express();
     let options = Object.assign({
-        p: 3000,
+        p: 3027,
         ip: 'localhost'
     }, args);
     app.use(BodyParser.json());

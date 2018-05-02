@@ -6,7 +6,7 @@ const ArgsParser = require("minimist");
 const Express = require("express");
 const BodyParser = require("body-parser");
 let args = ArgsParser(process.argv.slice(2));
-if (!args.entry) {
+if (!args.entry && !args.server) {
     console.error('entry point is not set');
     process.exit(-1);
 }
@@ -22,7 +22,10 @@ if (args.server) {
             if (!req.body.path.trim()) {
                 throw "Bad data path is not set";
             }
-            res.json(CfgBuilder.parse(req.body.path, args.entry));
+            if (!req.body.entry.trim()) {
+                throw "Bad data entry is not set";
+            }
+            res.json(CfgBuilder.parse(req.body.path, req.body.entry));
         }
         catch (e) {
             res.status(403).json(e, req.body).send();

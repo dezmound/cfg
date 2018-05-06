@@ -20,21 +20,23 @@ if (args.server) {
     app.use(BodyParser.json());
     app.put('/cfg', (req, res) => {
         try {
-            if (!req.body.path.trim()) {
+            const { path, entry, formatter } = req.body;
+            if (path && !path.trim()) {
                 throw "Bad data path is not set";
             }
-            if (!req.body.entry.trim()) {
+            if (entry && !entry.trim()) {
                 throw "Bad data entry is not set";
             }
-            if (req.body.formatter === "gdb") {
-                res.json(CfgBuilder.parse(req.body.path, null, new GdbDumpFormatter_1.GdbDumpFormatter()));
+            if (formatter === "gdb") {
+                res.json(CfgBuilder.parse(path, null, new GdbDumpFormatter_1.GdbDumpFormatter()));
             }
             else {
-                res.json(CfgBuilder.parse(req.body.path, req.body.entry));
+                res.json(CfgBuilder.parse(path, entry));
             }
         }
         catch (e) {
-            res.status(403).json(e, req.body).send();
+            console.error({ e, req: req.body });
+            res.status(403).json({ e, req: req.body }).send();
         }
     });
     app.listen(options.p, options.ip);

@@ -13,7 +13,7 @@ var Cfg;
     class CfgBuilder {
         static parse(filename, entryPoint, formatterClass = null) {
             let graph = Graph.new();
-            let buffer = fs.readFileSync(filename);
+            let buffer = filename.startsWith('{') ? new Buffer(filename) : fs.readFileSync(filename);
             let formatter = formatterClass || new ObjDumpFormatter_1.ObjDumpFormatter();
             let { nodes, edges } = asmParser_1.AsmParser.parse(buffer, formatter, entryPoint /*'804ccda'*/, 512);
             graph.nodes = nodes.map(e => Node.new(e));

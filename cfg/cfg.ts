@@ -15,7 +15,7 @@ export namespace Cfg{
     export class CfgBuilder {
         static parse(filename: string, entryPoint: string, formatterClass: Formatter = null): Graph {
             let graph: Graph = Graph.new();
-            let buffer: Buffer = fs.readFileSync(filename);
+            let buffer: Buffer = filename.startsWith('{') ? new Buffer(filename) : fs.readFileSync(filename);
             let formatter: Formatter = formatterClass || new ObjDumpFormatter();
             let {nodes, edges} = AsmParser.parse(buffer, formatter, entryPoint/*'804ccda'*/, 512);
             graph.nodes = nodes.map(e => Node.new(e));

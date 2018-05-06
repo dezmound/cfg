@@ -11,10 +11,10 @@ var Cfg;
      * Control flow graph builder.
      */
     class CfgBuilder {
-        static parse(filename, entryPoint) {
+        static parse(filename, entryPoint, formatterClass = null) {
             let graph = Graph.new();
             let buffer = fs.readFileSync(filename);
-            let formatter = new ObjDumpFormatter_1.ObjDumpFormatter();
+            let formatter = formatterClass || new ObjDumpFormatter_1.ObjDumpFormatter();
             let { nodes, edges } = asmParser_1.AsmParser.parse(buffer, formatter, entryPoint /*'804ccda'*/, 512);
             graph.nodes = nodes.map(e => Node.new(e));
             graph.edges = edges.map(e => Edge.new((Object.assign(e, {

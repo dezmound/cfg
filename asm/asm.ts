@@ -152,11 +152,17 @@ export namespace Asm{
          * Move pointer to row with same address.
          * @param {string} address
          */
-        public toPointer(address: string): boolean| Row {
+        public toPointer(address: string, nextOnError: boolean = true): boolean| Row {
+            if(address === null) {
+                return this.rows[this.pointer];
+            }
             let index = this.rows.findIndex(e => e.address === address);
             if(index >= 0){
                 this.pointer = index;
                 return this.rows[this.pointer];
+            }
+            if(nextOnError) {
+                return this.next().value;
             }
             return false;
         }

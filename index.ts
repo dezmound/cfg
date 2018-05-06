@@ -3,6 +3,7 @@ import CfgBuilder = Cfg.CfgBuilder;
 import * as ArgsParser from 'minimist';
 import * as Express from 'express';
 import * as BodyParser from 'body-parser';
+import {GdbDumpFormatter} from "./formatters/GdbDumpFormatter";
 
 let args = ArgsParser(process.argv.slice(2));
 
@@ -26,7 +27,11 @@ if(args.server){
             if(!req.body.entry.trim()) {
                 throw "Bad data entry is not set";
             }
-            res.json(CfgBuilder.parse(req.body.path, req.body.entry));
+            if(req.body.formatter === "gdb") {
+                res.json(CfgBuilder.parse(req.body.path, null, new GdbDumpFormatter()));
+            } else {
+                res.json(CfgBuilder.parse(req.body.path, req.body.entry));
+            }
         } catch (e) {
             res.status(403).json(e, req.body).send();
         }
@@ -34,7 +39,12 @@ if(args.server){
     app.listen(options.p, options.ip);
     console.log(`Listening of ${options.ip}:${options.p}`);
 } else if(args.file) {
-    let graph = CfgBuilder.parse(args.file, args.entry.toString());
+    let graph = null;
+    if(args.formatter === "gdb") {
+        graph = CfgBuilder.parse(args.file, null, new GdbDumpFormatter());
+    } else {
+        graph = CfgBuilder.parse(args.file, args.entry.toString());
+    }
     console.error(graph.nodes.length);
     console.log(JSON.stringify(graph));
 } else {

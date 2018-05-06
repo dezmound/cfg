@@ -94,7 +94,8 @@ class AsmParser {
                     // TODO Change simple save address of return to analyze stack contains.
                     // TODO bad jmp address.
                     if (!state.callstack.length) {
-                        throw new Error("Stack corruption. CallStack is empty now.");
+                        console.warn("Stack corruption. CallStack is empty now.");
+                        continue;
                     }
                     let callable = state.callstack.pop();
                     let node = null;

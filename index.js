@@ -35,8 +35,8 @@ if (args.server) {
             }
         }
         catch (e) {
-            console.error({ e, req: req.body });
-            res.status(403).json({ e, req: req.body }).send();
+            console.error(e);
+            res.status(403).json(e).send();
         }
     });
     app.listen(options.p, options.ip);
